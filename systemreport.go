@@ -7,18 +7,19 @@ import (
 )
 
 type SystemReport struct {
-	OS            string   `json:"OS"`
-	KernelVersion string   `json:"Kernel Version"`
-	Arch          string   `json:"Architecture"`
-	GCCVersion    string   `json:"GCC Version"`
-	Hostname      string   `json:"Hostname"`
-	CPU           string   `json:"CPU"`
-	Threads       int      `json:"Threads"`
-	Memory        string   `json:"Memory"`
-	Swap          string   `json:"Swap"`
-	Uptime        string   `json:"Uptime"`
-	Network       []string `json:Network`
-	PCIDevices    []string `json:"PCI Devices"`
+	OS            string            `json:"OS"`
+	KernelVersion string            `json:"Kernel Version"`
+	Arch          string            `json:"Architecture"`
+	GCCVersion    string            `json:"GCC Version"`
+	Hostname      string            `json:"Hostname"`
+	CPU           string            `json:"CPU"`
+	Threads       int               `json:"Threads"`
+	Memory        string            `json:"Memory"`
+	Swap          string            `json:"Swap"`
+	Uptime        string            `json:"Uptime"`
+	Network       []string          `json:"Network"`
+	Disk          map[string]string `json:"Disks"`
+	PCIDevices    map[string]string `json:"PCI Devices"`
 }
 
 func main() {
@@ -40,7 +41,9 @@ func main() {
 	systemReport.Swap = fmt.Sprintf("%d MiB / %d MiB", swapFree, swapTotal)
 	systemReport.Uptime = uptime
 	ipAddress := utils.GetIPInfo()
+	diskSizes := utils.GetDiskInfo()
 	systemReport.Network = ipAddress
+	systemReport.Disk = diskSizes
 	pciDevices := utils.GetAllPCIDevices()
 	systemReport.PCIDevices = pciDevices
 	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")

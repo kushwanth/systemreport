@@ -60,14 +60,14 @@ func queryPCIInfo(pciIdWithVendorId string) string {
 	return pciInfo
 }
 
-func GetAllPCIDevices() []string {
+func GetAllPCIDevices() map[string]string {
 	pciDevices, err1 := filepath.Glob("/sys/bus/pci/devices/*/uevent")
 	if err1 != nil {
 		panic("Unable to read PCI devices")
 	}
 	pciDevicesInfo := getPCIDataInfo()
 	var pciInfos = map[string]string{}
-	var pciDevicesFormatted []string
+	// var pciDevicesFormatted []string
 	for _, pciDevicePath := range pciDevices {
 		pciDeviceData, err2 := os.ReadFile(pciDevicePath)
 		if err2 != nil {
@@ -81,8 +81,8 @@ func GetAllPCIDevices() []string {
 			fmt.Errorf("PCI device data doesn't exist")
 		} else {
 			pciInfos[pciId] = pciDeviceInfo
-			pciDeviceFormatted := fmt.Sprintf("%s=%s", pciId, pciDeviceInfo)
-			pciDevicesFormatted = append(pciDevicesFormatted, pciDeviceFormatted)
+			// pciDeviceFormatted := fmt.Sprintf("%s=%s", pciId, pciDeviceInfo)
+			// pciDevicesFormatted = append(pciDevicesFormatted, pciDeviceFormatted)
 		}
 	}
 	// formattedPCIDevicesData, err4 := json.MarshalIndent(pciInfos, "", "    ")
@@ -90,5 +90,5 @@ func GetAllPCIDevices() []string {
 	// 	return "", err4
 	// }
 	// availablePCIDevices := strings.Join(pciDevicesFormatted, "\n")
-	return pciDevicesFormatted
+	return pciInfos
 }
