@@ -19,6 +19,7 @@ type SystemReport struct {
 	Uptime        string            `json:"Uptime"`
 	Network       []string          `json:"Network"`
 	Disk          map[string]string `json:"Disks"`
+	Env           map[string]string `json:"OS Env"`
 	PCIDevices    map[string]string `json:"PCI Devices"`
 }
 
@@ -42,8 +43,10 @@ func main() {
 	systemReport.Uptime = uptime
 	ipAddress := utils.GetIPInfo()
 	diskSizes := utils.GetDiskInfo()
+	osEnvs := utils.GetOSEnv()
 	systemReport.Network = ipAddress
 	systemReport.Disk = diskSizes
+	systemReport.Env = osEnvs
 	pciDevices := utils.GetAllPCIDevices()
 	systemReport.PCIDevices = pciDevices
 	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")
