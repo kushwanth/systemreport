@@ -11,15 +11,16 @@ import (
 	"time"
 )
 
-func getDistroReleaseData() map[string]string {
+func getDistroReleaseData() (map[string]string, error) {
 	distroReleasePath, _ := filepath.Abs("data/distro-release-names.json")
+	var distroReleases map[string]string
 	file, err := os.ReadFile(distroReleasePath)
 	if err != nil {
 		fmt.Errorf("Unable to read Distro release file")
+		return distroReleases, err
 	}
-	var distroReleases map[string]string
 	json.Unmarshal(file, &distroReleases)
-	return distroReleases
+	return distroReleases, nil
 }
 
 func GetLinuxVersion() (string, string) {
@@ -47,16 +48,19 @@ func GetLinuxDistro() string {
 			distroName = "Linux(Unknown)"
 		} else {
 			var possibleDistroNames = []string{}
-			distroReleases := getDistroReleaseData()
+			distroReleases, err3 := getDistroReleaseData()
+			if err3 != nil {
+				return "Unknown"
+			}
 			for _, releaseFile := range distroReleaseFiles {
-				releaseName, err3 := distroReleases[releaseFile]
-				if err3 {
+				releaseName, err4 := distroReleases[releaseFile]
+				if err4 {
 					possibleDistroNames = append(possibleDistroNames, releaseName)
 				}
 			}
 			for _, versionFile := range distroVersionFiles {
-				versionName, err4 := distroReleases[versionFile]
-				if err4 {
+				versionName, err5 := distroReleases[versionFile]
+				if err5 {
 					possibleDistroNames = append(possibleDistroNames, versionName)
 				}
 			}
@@ -69,12 +73,13 @@ func GetLinuxDistro() string {
 func GetUptime() string {
 	uptimeFile, err1 := os.ReadFile("/proc/uptime")
 	if err1 != nil {
-		fmt.Errorf("Unable to read /proc/uptime")
+		panic("Unable to read /proc/uptime")
 	}
 	uptimeData := strings.Split(string(uptimeFile), " ")
 	uptimeStr, err2 := strconv.ParseFloat(uptimeData[0], 64)
 	if err2 != nil {
-		fmt.Errorf("Unablr to parse uptime")
+		fmt.Errorf("Unable to parse uptime")
+		return "Unknown"
 	}
 	var uptime time.Time
 	uptime = uptime.Add(time.Duration(uptimeStr) * time.Second)

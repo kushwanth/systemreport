@@ -17,6 +17,7 @@ type SystemReport struct {
 	Memory        string   `json:"Memory"`
 	Swap          string   `json:"Swap"`
 	Uptime        string   `json:"Uptime"`
+	Network       []string `json:Network`
 	PCIDevices    []string `json:"PCI Devices"`
 }
 
@@ -38,11 +39,13 @@ func main() {
 	systemReport.Memory = fmt.Sprintf("%d MiB/ %d MiB", memFree, memTotal)
 	systemReport.Swap = fmt.Sprintf("%d MiB / %d MiB", swapFree, swapTotal)
 	systemReport.Uptime = uptime
+	ipAddress := utils.GetIPInfo()
+	systemReport.Network = ipAddress
 	pciDevices := utils.GetAllPCIDevices()
 	systemReport.PCIDevices = pciDevices
-	formattedSystemReport, err := json.MarshalIndent(systemReport, "", "    ")
+	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")
 	if err != nil {
 		fmt.Errorf("Unable to generate System Report")
 	}
-	fmt.Println(string(formattedSystemReport))
+	fmt.Println(string(jsonSystemReport))
 }

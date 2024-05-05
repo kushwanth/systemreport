@@ -1,6 +1,10 @@
 # systemreport
 
-## A simple tool inspired from neofetch, inxi
+### A simple tool to get system information using Linux /proc and /sys file systems
+
+**Inspired from neofetch, inxi**
+
+#### Tested and works on x86
 
 #### References
 - https://github.com/powersj/pciids
