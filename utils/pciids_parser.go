@@ -21,7 +21,7 @@ type PCIID struct {
 	SubDeviceName string `json:"subdeviceName,omitempty"`
 }
 
-var pciDevicesIDRegEx = regexp.MustCompile("PCI_ID=[A-Za-z0-9]+:[A-Za-z0-9]+")
+var pciDevicesIDRegEx = regexp.MustCompile("PCI_ID=(.*)")
 
 func parsePCIIds() []PCIID {
 	pciidsPath, _ := filepath.Abs("data/_pciids.json")
@@ -60,7 +60,7 @@ func queryPCIInfo(pciIdWithVendorId string) string {
 	return pciInfo
 }
 
-func GetAllPCIDevices() string {
+func GetAllPCIDevices() []string {
 	pciDevices, err1 := filepath.Glob("/sys/bus/pci/devices/*/uevent")
 	if err1 != nil {
 		panic("Unable to read PCI devices")
@@ -75,14 +75,13 @@ func GetAllPCIDevices() string {
 			continue
 		}
 		pciIdMatched := pciDevicesIDRegEx.FindStringSubmatch(string(pciDeviceData))
-		pciIds := strings.Split(pciIdMatched[0], "PCI_ID=")
-		pciId := strings.TrimSpace(pciIds[1])
+		pciId := strings.TrimSpace(pciIdMatched[1])
 		pciDeviceInfo, err3 := pciDevicesInfo[pciId]
 		if !err3 {
 			fmt.Errorf("PCI device data doesn't exist")
 		} else {
 			pciInfos[pciId] = pciDeviceInfo
-			pciDeviceFormatted := fmt.Sprintf("%s: %s", pciId, pciDeviceInfo)
+			pciDeviceFormatted := fmt.Sprintf("%s=%s", pciId, pciDeviceInfo)
 			pciDevicesFormatted = append(pciDevicesFormatted, pciDeviceFormatted)
 		}
 	}
@@ -90,6 +89,6 @@ func GetAllPCIDevices() string {
 	// if err4 != nil {
 	// 	return "", err4
 	// }
-	availablePCIDevices := strings.Join(pciDevicesFormatted, "\n")
-	return availablePCIDevices
+	// availablePCIDevices := strings.Join(pciDevicesFormatted, "\n")
+	return pciDevicesFormatted
 }
