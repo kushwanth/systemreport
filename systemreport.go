@@ -21,6 +21,7 @@ type SystemReport struct {
 	Disk          map[string]string            `json:"Disks"`
 	Env           map[string]string            `json:"OS:Env"`
 	Power         map[string]map[string]string `json:"Power"`
+	System        map[string]string            `json:"System"`
 	PCIDevices    map[string]string            `json:"PCI:Devices"`
 }
 
@@ -49,7 +50,9 @@ func main() {
 	systemReport.Disk = diskSizes
 	systemReport.Env = osEnvs
 	power := utils.GetBatteryInfo()
+	system := utils.GetHWInfo()
 	systemReport.Power = power
+	systemReport.System = system
 	pciDevices := utils.GetAllPCIDevices()
 	systemReport.PCIDevices = pciDevices
 	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")

@@ -27,7 +27,7 @@ func getPowerSupplyValue(regexMatches []string) string {
 			return strings.ToUpper(regexMatches[1])
 		}
 	}
-	return "Unknown"
+	return "UNKNOWN"
 }
 
 func boolToLabel(boolIntStr string) string {
@@ -68,7 +68,7 @@ func GetBatteryInfo() map[string]map[string]string {
 			energyFullDesign, err3 := strconv.ParseFloat(getPowerSupplyValue(powerSupplyDeviceEnergyFullDesignRegex.FindStringSubmatch(powerSupplyData)), 64)
 			energyFullNow, err4 := strconv.ParseFloat(getPowerSupplyValue(powerSupplyDeviceEnerygyFullNowRegex.FindStringSubmatch(powerSupplyData)), 64)
 			if err3 != nil || err4 != nil {
-				batteryInfo["Power:Capacity"] = "Unknown"
+				batteryInfo["Power:Capacity"] = "UNKNOWN"
 			} else {
 				batteryInfo["Power:Capacity"] = fmt.Sprintf("%.0f%%", math.Round((energyFullNow/energyFullDesign)*100))
 			}

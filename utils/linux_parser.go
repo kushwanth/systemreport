@@ -50,7 +50,7 @@ func GetLinuxDistro() string {
 			var possibleDistroNames = []string{}
 			distroReleases, err3 := getDistroReleaseData()
 			if err3 != nil {
-				return "Unknown"
+				return "UNKNOWN"
 			}
 			for _, releaseFile := range distroReleaseFiles {
 				releaseName, err4 := distroReleases[releaseFile]
@@ -79,7 +79,7 @@ func GetUptime() string {
 	uptimeStr, err2 := strconv.ParseFloat(uptimeData[0], 64)
 	if err2 != nil {
 		fmt.Errorf("Unable to parse uptime")
-		return "Unknown"
+		return "UNKNOWN"
 	}
 	var uptime time.Time
 	uptime = uptime.Add(time.Duration(uptimeStr) * time.Second)
@@ -88,7 +88,7 @@ func GetUptime() string {
 }
 
 func GetKernelInfo() [2]string {
-	kernelInfo := [2]string{"Unknown", "Unknown"}
+	kernelInfo := [2]string{"UNKNOWN", "UNKNOWN"}
 	archFile, err1 := os.ReadFile("/proc/sys/kernel/arch")
 	hostnameFile, err2 := os.ReadFile("/proc/sys/kernel/hostname")
 	if err1 == nil {
