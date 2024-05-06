@@ -1,10 +1,12 @@
 # systemreport
 
-### A simple tool to get system information using Linux /proc and /sys file systems
+### A simple tool to get system information on Linux by parsing /proc and /sys filesystems
 
 **Inspired from neofetch, inxi**
 
-#### Tested and works on x86
+| :warning: WARNING          |
+|:---------------------------|
+| The output of this tool may be inaccurate as it relies on parsing /proc and /sys filesystems |
 
 #### References
 - https://github.com/powersj/pciids
