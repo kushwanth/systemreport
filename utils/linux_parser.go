@@ -93,11 +93,11 @@ func GetKernelInfo() [2]string {
 	hostnameFile, err2 := os.ReadFile("/proc/sys/kernel/hostname")
 	if err1 == nil {
 		systemArch := strings.TrimSpace(string(archFile))
-		kernelInfo[0] = strings.ToUpper(systemArch)
+		kernelInfo[0] = strings.ToLower(systemArch)
 	}
 	if err2 == nil {
 		systemHostname := strings.TrimSpace(string(hostnameFile))
-		kernelInfo[1] = strings.ToUpper(systemHostname)
+		kernelInfo[1] = strings.ToLower(systemHostname)
 	}
 	return kernelInfo
 }
