@@ -1,0 +1,16 @@
+func parsePCIIds() []PCIID {
+	pciidsPath, _ := filepath.Abs("data/_pciids.json")
+	file, err := os.ReadFile(pciidsPath)
+	if err != nil {
+		panic("Unable to read PCI Ids file")
+	}
+	var PCIIDs []PCIID
+	json.Unmarshal(file, &PCIIDs)
+	var PCIInfos = map[string]string{}
+	for _, pciId := range PCIIDs {
+		pciInfoId := fmt.Sprintf("%s:%s", strings.ToUpper(pciId.VendorID), strings.ToUpper(pciId.DeviceID))
+		pciInfoName := fmt.Sprintf("%s %s", pciId.VendorName, pciId.DeviceName)
+		PCIInfos[pciInfoId] = pciInfoName
+	}
+	return PCIIDs
+}

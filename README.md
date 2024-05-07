@@ -1,6 +1,8 @@
 # systemreport
 
-### A simple tool to get system information on Linux by parsing /proc and /sys filesystems
+### A simple tool to get system information on Linux by parsing /proc and /sys filesystems.
+
+##### Made with Go using standard library exclusively
 
 **Inspired from neofetch, inxi**
 

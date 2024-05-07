@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"systemreport/utils"
 )
 
 type SystemReport struct {
@@ -27,12 +26,12 @@ type SystemReport struct {
 
 func main() {
 	var systemReport SystemReport
-	kernelVersion, gccVersion := utils.GetLinuxVersion()
-	distroName := utils.GetLinuxDistro()
-	uptime := utils.GetUptime()
-	CPUModel, CPUCount := utils.CpuInfo()
-	memTotal, memFree, swapTotal, swapFree := utils.MemInfo()
-	kernelInfo := utils.GetKernelInfo()
+	kernelVersion, gccVersion := GetLinuxVersion()
+	distroName := GetLinuxDistro()
+	uptime := GetUptime()
+	CPUModel, CPUCount := CpuInfo()
+	memTotal, memFree, swapTotal, swapFree := MemInfo()
+	kernelInfo := GetKernelInfo()
 	systemReport.OS = distroName
 	systemReport.KernelVersion = kernelVersion
 	systemReport.Arch = kernelInfo[0]
@@ -43,17 +42,17 @@ func main() {
 	systemReport.Memory = fmt.Sprintf("%d MB / %d MB", memFree, memTotal)
 	systemReport.Swap = fmt.Sprintf("%d MB / %d MB", swapFree, swapTotal)
 	systemReport.Uptime = uptime
-	ipAddress := utils.GetIPInfo()
-	diskSizes := utils.GetDiskInfo()
-	osEnvs := utils.GetOSEnv()
+	ipAddress := GetIPInfo()
+	diskSizes := GetDiskInfo()
+	osEnvs := GetOSEnv()
 	systemReport.Network = ipAddress
 	systemReport.Disk = diskSizes
 	systemReport.Env = osEnvs
-	power := utils.GetBatteryInfo()
-	system := utils.GetHWInfo()
+	power := GetBatteryInfo()
+	system := GetHWInfo()
 	systemReport.Power = power
 	systemReport.System = system
-	pciDevices := utils.GetAllPCIDevices()
+	pciDevices := GetAllPCIDevices()
 	systemReport.PCIDevices = pciDevices
 	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")
 	if err != nil {

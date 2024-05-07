@@ -1,4 +1,4 @@
-package utils
+package main
 
 import (
 	"fmt"
@@ -56,7 +56,6 @@ func GetBatteryInfo() map[string]map[string]string {
 		}
 		powerSupplyData := string(powerSupplyDataBytes)
 		powerSupplyName := getPowerSupplyValue(powerSupplyNameRegex.FindStringSubmatch(batteryUeventFile))
-		//batteryInfo["Label"] = getPowerSupplyValue(powerSupplyDeviceNameRegex.FindStringSubmatch(powerSupplyData))
 		batteryInfo["Class"] = getPowerSupplyValue(powerSupplyDeviceTypeRegex.FindStringSubmatch(powerSupplyData))
 		if strings.Contains(powerSupplyName, "AC") {
 			batteryInfo["Connected"] = boolToLabel(getPowerSupplyValue(powerSupplyDeviceAConlineRegex.FindStringSubmatch(powerSupplyData)))

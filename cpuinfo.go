@@ -1,4 +1,4 @@
-package utils
+package main
 
 import (
 	"os"
@@ -66,10 +66,6 @@ func CpuInfo() (string, int) {
 		cpuProcesserParsedData := parseCPUInfo(cpuProcessorData)
 		cpuProcessors = append(cpuProcessors, cpuProcesserParsedData)
 	}
-	// formattedCPUData, err2 := json.MarshalIndent(cpuProcessors, "", "    ")
-	// if err2 != nil {
-	// 	return "", 0, err2
-	// }
 	cpuModel := strings.Join(cpuModels, " ")
 	return strings.TrimSpace(cpuModel), len(cpuProcessors)
 }

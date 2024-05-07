@@ -1,6 +1,7 @@
-package utils
+package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -21,38 +22,13 @@ type PCIID struct {
 	SubDeviceName string `json:"subdeviceName,omitempty"`
 }
 
+//go:embed data/pciinfo.json
+var pciDevicesData []byte
 var pciDevicesIDRegEx = regexp.MustCompile("PCI_ID=(.*)")
 
-func parsePCIIds() []PCIID {
-	pciidsPath, _ := filepath.Abs("data/_pciids.json")
-	file, err := os.ReadFile(pciidsPath)
-	if err != nil {
-		panic("Unable to read PCI Ids file")
-	}
-	var PCIIDs []PCIID
-	json.Unmarshal(file, &PCIIDs)
-	var PCIInfos = map[string]string{}
-	for _, pciId := range PCIIDs {
-		pciInfoId := fmt.Sprintf("%s:%s", strings.ToUpper(pciId.VendorID), strings.ToUpper(pciId.DeviceID))
-		pciInfoName := fmt.Sprintf("%s %s", pciId.VendorName, pciId.DeviceName)
-		PCIInfos[pciInfoId] = pciInfoName
-	}
-	return PCIIDs
-}
-
-func getPCIDataInfo() map[string]string {
-	pciInfoPath, _ := filepath.Abs("data/pciinfo.json")
-	file, err := os.ReadFile(pciInfoPath)
-	if err != nil {
-		panic("Unable to read PCI Ids file")
-	}
-	var pciInfos map[string]string
-	json.Unmarshal(file, &pciInfos)
-	return pciInfos
-}
-
 func queryPCIInfo(pciIdWithVendorId string) string {
-	pciInfos := getPCIDataInfo()
+	var pciInfos map[string]string
+	json.Unmarshal(pciDevicesData, &pciInfos)
 	pciInfo, err := pciInfos[pciIdWithVendorId]
 	if !err {
 		fmt.Errorf("PCI data doesn't exist")
@@ -65,9 +41,12 @@ func GetAllPCIDevices() map[string]string {
 	if err1 != nil {
 		panic("Unable to read PCI devices")
 	}
-	pciDevicesInfo := getPCIDataInfo()
+	var pciDevicesInfo map[string]string
+	pErr := json.Unmarshal(pciDevicesData, &pciDevicesInfo)
+	if pErr != nil {
+		panic("Unable to fetch PCI Data")
+	}
 	var pciInfos = map[string]string{}
-	// var pciDevicesFormatted []string
 	for _, pciDevicePath := range pciDevices {
 		pciDeviceData, err2 := os.ReadFile(pciDevicePath)
 		if err2 != nil {
@@ -81,14 +60,7 @@ func GetAllPCIDevices() map[string]string {
 			fmt.Errorf("PCI device data doesn't exist")
 		} else {
 			pciInfos[pciId] = pciDeviceInfo
-			// pciDeviceFormatted := fmt.Sprintf("%s=%s", pciId, pciDeviceInfo)
-			// pciDevicesFormatted = append(pciDevicesFormatted, pciDeviceFormatted)
 		}
 	}
-	// formattedPCIDevicesData, err4 := json.MarshalIndent(pciInfos, "", "    ")
-	// if err4 != nil {
-	// 	return "", err4
-	// }
-	// availablePCIDevices := strings.Join(pciDevicesFormatted, "\n")
 	return pciInfos
 }

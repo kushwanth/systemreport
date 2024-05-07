@@ -1,6 +1,7 @@
-package utils
+package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -11,15 +12,16 @@ import (
 	"time"
 )
 
+//go:embed data/distro-release-names.json
+var distroReleasesData []byte
+
 func getDistroReleaseData() (map[string]string, error) {
-	distroReleasePath, _ := filepath.Abs("data/distro-release-names.json")
 	var distroReleases map[string]string
-	file, err := os.ReadFile(distroReleasePath)
+	err := json.Unmarshal(distroReleasesData, &distroReleases)
 	if err != nil {
 		fmt.Errorf("Unable to read Distro release file")
-		return distroReleases, err
+		return nil, err
 	}
-	json.Unmarshal(file, &distroReleases)
 	return distroReleases, nil
 }
 
