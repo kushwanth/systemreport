@@ -25,14 +25,18 @@ func getDistroReleaseData() (map[string]string, error) {
 	return distroReleases, nil
 }
 
-func GetLinuxVersion() (string, string) {
-	procVersionRegex := regexp.MustCompile(`Linux version (\S+).*gcc \(GCC\) (\S+)`)
+func GetKernelGCCVersion() string {
+	procVersionRegex := regexp.MustCompile(`\(([^@]*)\)`)
 	procVersionInfo, err1 := os.ReadFile("/proc/version")
 	if err1 != nil {
 		panic("Unable to read /proc/version")
 	}
+	gccVersion := "UNKNOWN"
 	procVersionMatches := procVersionRegex.FindStringSubmatch(string(procVersionInfo))
-	return procVersionMatches[1], procVersionMatches[2]
+	if len(procVersionMatches) == 2 {
+		gccVersion = procVersionMatches[1]
+	}
+	return gccVersion
 }
 
 func GetLinuxDistro() string {
@@ -89,10 +93,12 @@ func GetUptime() string {
 	return parsedUptime
 }
 
-func GetKernelInfo() [2]string {
-	kernelInfo := [2]string{"UNKNOWN", "UNKNOWN"}
+func GetKernelInfo() [4]string {
+	kernelInfo := [4]string{"UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN"}
 	archFile, err1 := os.ReadFile("/proc/sys/kernel/arch")
 	hostnameFile, err2 := os.ReadFile("/proc/sys/kernel/hostname")
+	osReleaseFile, err3 := os.ReadFile("/proc/sys/kernel/osrelease")
+	kernelVersionFile, err4 := os.ReadFile("/proc/sys/kernel/version")
 	if err1 == nil {
 		systemArch := strings.TrimSpace(string(archFile))
 		kernelInfo[0] = strings.ToLower(systemArch)
@@ -100,6 +106,14 @@ func GetKernelInfo() [2]string {
 	if err2 == nil {
 		systemHostname := strings.TrimSpace(string(hostnameFile))
 		kernelInfo[1] = strings.ToLower(systemHostname)
+	}
+	if err3 == nil {
+		osRelease := strings.TrimSpace(string(osReleaseFile))
+		kernelInfo[2] = strings.ToLower(osRelease)
+	}
+	if err4 == nil {
+		kernelRelease := strings.TrimSpace(string(kernelVersionFile))
+		kernelInfo[3] = strings.ToUpper(kernelRelease)
 	}
 	return kernelInfo
 }

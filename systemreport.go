@@ -7,6 +7,7 @@ import (
 
 type SystemReport struct {
 	OS            string                       `json:"OS"`
+	KernelRelease string                       `json:"Kernel:Release"`
 	KernelVersion string                       `json:"Kernel:Version"`
 	Arch          string                       `json:"Architecture"`
 	GCCVersion    string                       `json:"GCC:Version"`
@@ -26,14 +27,15 @@ type SystemReport struct {
 
 func main() {
 	var systemReport SystemReport
-	kernelVersion, gccVersion := GetLinuxVersion()
+	gccVersion := GetKernelGCCVersion()
 	distroName := GetLinuxDistro()
 	uptime := GetUptime()
 	CPUModel, CPUCount := CpuInfo()
 	memTotal, memFree, swapTotal, swapFree := MemInfo()
 	kernelInfo := GetKernelInfo()
 	systemReport.OS = distroName
-	systemReport.KernelVersion = kernelVersion
+	systemReport.KernelRelease = kernelInfo[2]
+	systemReport.KernelVersion = kernelInfo[3]
 	systemReport.Arch = kernelInfo[0]
 	systemReport.GCCVersion = gccVersion
 	systemReport.Hostname = kernelInfo[1]
