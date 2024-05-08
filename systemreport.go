@@ -13,6 +13,7 @@ type SystemReport struct {
 	GCCVersion    string                       `json:"GCC:Version"`
 	Hostname      string                       `json:"Hostname"`
 	CPU           string                       `json:"CPU"`
+	GPU           []string                     `json:"GPU"`
 	Threads       int                          `json:"Threads"`
 	Memory        string                       `json:"Memory"`
 	Swap          string                       `json:"Swap"`
@@ -54,7 +55,12 @@ func main() {
 	system := GetHWInfo()
 	systemReport.Power = power
 	systemReport.System = system
-	pciDevices := GetAllPCIDevices()
+	pciDevices, gpuInfo := GetAllPCIDevices()
+	if len(gpuInfo) == 0 {
+		systemReport.GPU = []string{"UNKNOWN"}
+	} else {
+		systemReport.GPU = gpuInfo
+	}
 	systemReport.PCIDevices = pciDevices
 	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")
 	if err != nil {

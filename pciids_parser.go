@@ -25,6 +25,7 @@ type PCIID struct {
 //go:embed data/pciinfo.json
 var pciDevicesData []byte
 var pciDevicesIDRegEx = regexp.MustCompile("PCI_ID=(.*)")
+var pciModaliasRegEx = regexp.MustCompile("pci:v0000([A-Za-z0-9]*)d0000([A-Za-z0-9]*)sv0000([A-Za-z0-9]*)sd0000([A-Za-z0-9]*)bc([A-Za-z0-9]*)sc([A-Za-z0-9]*)i([A-Za-z0-9]*)")
 
 func queryPCIInfo(pciIdWithVendorId string) string {
 	var pciInfos map[string]string
@@ -36,8 +37,8 @@ func queryPCIInfo(pciIdWithVendorId string) string {
 	return pciInfo
 }
 
-func GetAllPCIDevices() map[string]string {
-	pciDevices, err1 := filepath.Glob("/sys/bus/pci/devices/*/uevent")
+func GetAllPCIDevices() (map[string]string, []string) {
+	pciModaliasFiles, err1 := filepath.Glob("/sys/bus/pci/devices/*/modalias")
 	if err1 != nil {
 		panic("Unable to read PCI devices")
 	}
@@ -47,20 +48,24 @@ func GetAllPCIDevices() map[string]string {
 		panic("Unable to fetch PCI Data")
 	}
 	var pciInfos = map[string]string{}
-	for _, pciDevicePath := range pciDevices {
-		pciDeviceData, err2 := os.ReadFile(pciDevicePath)
+	var gpuInfo []string
+	for _, pciModaliasFile := range pciModaliasFiles {
+		pciModaliasData, err2 := os.ReadFile(pciModaliasFile)
 		if err2 != nil {
-			fmt.Errorf("Unable to read PCI Ids file")
+			fmt.Errorf("Unable to read PCI modalias file")
 			continue
 		}
-		pciIdMatched := pciDevicesIDRegEx.FindStringSubmatch(string(pciDeviceData))
-		pciId := strings.TrimSpace(pciIdMatched[1])
+		pciModaliasMatched := pciModaliasRegEx.FindStringSubmatch(string(pciModaliasData))
+		pciId := strings.Join(pciModaliasMatched[1:3], ":")
 		pciDeviceInfo, err3 := pciDevicesInfo[pciId]
 		if !err3 {
 			fmt.Errorf("PCI device data doesn't exist")
 		} else {
+			if strings.Contains(pciModaliasMatched[5], "03") {
+				gpuInfo = append(gpuInfo, pciDeviceInfo)
+			}
 			pciInfos[pciId] = pciDeviceInfo
 		}
 	}
-	return pciInfos
+	return pciInfos, gpuInfo
 }
