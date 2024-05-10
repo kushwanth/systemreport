@@ -41,12 +41,13 @@ func boolToLabel(boolIntStr string) string {
 	return label
 }
 
-func GetBatteryInfo() map[string]map[string]string {
+func GetBatteryInfo() (map[string]map[string]string, string) {
 	var powerSupplyInfo = map[string]map[string]string{}
+	var batterySupplyName string
 	batteryUeventFiles, err1 := filepath.Glob("/sys/class/power_supply/[A-Z]*/uevent")
 	if err1 != nil {
 		errorOut("Unable to fetch battery state from /sys/class/power_supply")
-		return powerSupplyInfo
+		return powerSupplyInfo, batterySupplyName
 	}
 	for _, batteryUeventFile := range batteryUeventFiles {
 		var batteryInfo = map[string]string{}
@@ -61,18 +62,19 @@ func GetBatteryInfo() map[string]map[string]string {
 			batteryInfo["Connected"] = boolToLabel(getPowerSupplyValue(powerSupplyDeviceAConlineRegex.FindStringSubmatch(powerSupplyData)))
 		}
 		if strings.Contains(powerSupplyName, "BAT") {
+			batterySupplyName = powerSupplyName
 			batteryInfo["Connected"] = boolToLabel(getPowerSupplyValue(powerSupplyDeviceBATPresentRegex.FindStringSubmatch(powerSupplyData)))
 			batteryInfo["State"] = getPowerSupplyValue(powerSupplyDeviceStatusRegex.FindStringSubmatch(powerSupplyData))
-			batteryInfo["Power:Charge"] = fmt.Sprintf("%s%%", getPowerSupplyValue(powerSupplyDeviceLevelRegex.FindStringSubmatch(powerSupplyData)))
+			batteryInfo["Battery:Charge"] = fmt.Sprintf("%s%%", getPowerSupplyValue(powerSupplyDeviceLevelRegex.FindStringSubmatch(powerSupplyData)))
 			energyFullDesign, err3 := strconv.ParseFloat(getPowerSupplyValue(powerSupplyDeviceEnergyFullDesignRegex.FindStringSubmatch(powerSupplyData)), 64)
 			energyFullNow, err4 := strconv.ParseFloat(getPowerSupplyValue(powerSupplyDeviceEnerygyFullNowRegex.FindStringSubmatch(powerSupplyData)), 64)
 			if err3 != nil || err4 != nil {
-				batteryInfo["Power:Capacity"] = "UNKNOWN"
+				batteryInfo["Battery:Capacity"] = "UNKNOWN"
 			} else {
-				batteryInfo["Power:Capacity"] = fmt.Sprintf("%.0f%%", math.Round((energyFullNow/energyFullDesign)*100))
+				batteryInfo["Battery:Capacity"] = fmt.Sprintf("%.0f%%", math.Round((energyFullNow/energyFullDesign)*100))
 			}
 		}
 		powerSupplyInfo[powerSupplyName] = batteryInfo
 	}
-	return powerSupplyInfo
+	return powerSupplyInfo, batterySupplyName
 }

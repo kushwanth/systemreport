@@ -28,7 +28,7 @@ type SystemReport struct {
 	PCIDevices    map[string]string            `json:"PCI:Devices"`
 }
 
-func getSystemReport() SystemReport {
+func main() {
 	var systemReport SystemReport
 	gccVersion := GetKernelGCCVersion()
 	distroName := GetLinuxDistro()
@@ -48,12 +48,12 @@ func getSystemReport() SystemReport {
 	systemReport.Swap = fmt.Sprintf("%d MB / %d MB", swapFree, swapTotal)
 	systemReport.Uptime = uptime
 	ipAddress := GetIPInfo()
-	diskSizes := GetDiskInfo()
+	diskSizes, possibleDiskCapacity := GetDiskInfo()
 	osEnvs := GetOSEnv()
 	systemReport.Network = ipAddress
 	systemReport.Disk = diskSizes
 	systemReport.Env = osEnvs
-	power := GetBatteryInfo()
+	power, batteryName := GetBatteryInfo()
 	system := GetHWInfo()
 	systemReport.Power = power
 	systemReport.System = system
@@ -64,20 +64,21 @@ func getSystemReport() SystemReport {
 		systemReport.GPU = gpuInfo
 	}
 	systemReport.PCIDevices = pciDevices
-	return systemReport
-}
-
-func main() {
-	systemReport := getSystemReport()
 	stringOut("OS", systemReport.OS)
 	stringOut("Kernel:Release", systemReport.KernelRelease)
 	stringOut("Architecture", systemReport.Arch)
 	stringOut("GCC:Version", systemReport.GCCVersion)
 	stringOut("CPU", systemReport.CPU)
 	arrayOut("GPU", systemReport.GPU)
+	if len(systemReport.Disk) > 0 {
+		stringOut("Disk:Size*", possibleDiskCapacity)
+	}
 	stringOut("Threads", systemReport.Threads)
 	stringOut("Memory", systemReport.Memory)
 	arrayOut("Network", systemReport.Network)
+	if len(batteryName) > 3 {
+		mapOut("Battery:Charge", systemReport.Power[batteryName])
+	}
 	stringOut("Uptime", systemReport.Uptime)
 	mapOut("LANG", systemReport.Env)
 	mapOut("SHELL", systemReport.Env)
@@ -92,6 +93,6 @@ func main() {
 		errorOut("Unable to generate System Report")
 	} else {
 		os.WriteFile("/tmp/systemreport.json", jsonSystemReportBytes, 0644)
-		warningOut("Full System Report stored at /tmp/systemreport.json")
+		warningOut("Full System Report has been stored at /tmp/systemreport.json")
 	}
 }
