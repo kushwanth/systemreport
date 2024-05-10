@@ -28,10 +28,11 @@ func getDistroReleaseData() (map[string]string, error) {
 func GetKernelGCCVersion() string {
 	procVersionRegex := regexp.MustCompile(`\(([^@]*)\)`)
 	procVersionInfo, err1 := os.ReadFile("/proc/version")
-	if err1 != nil {
-		panic("Unable to read /proc/version")
-	}
 	gccVersion := "UNKNOWN"
+	if err1 != nil {
+		errorOut("Unable to read /proc/version")
+		return gccVersion
+	}
 	procVersionMatches := procVersionRegex.FindStringSubmatch(string(procVersionInfo))
 	if len(procVersionMatches) == 2 {
 		gccVersion = procVersionMatches[1]
@@ -79,7 +80,8 @@ func GetLinuxDistro() string {
 func GetUptime() string {
 	uptimeFile, err1 := os.ReadFile("/proc/uptime")
 	if err1 != nil {
-		panic("Unable to read /proc/uptime")
+		errorOut("Unable to read /proc/uptime")
+		return "UNKNOWN"
 	}
 	uptimeData := strings.Split(string(uptimeFile), " ")
 	uptimeStr, err2 := strconv.ParseFloat(uptimeData[0], 64)
