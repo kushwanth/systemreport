@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -9,7 +8,7 @@ import (
 func getValue(fileBytes []byte, err error) string {
 	var value string
 	if err != nil {
-		fmt.Errorf("Unable to read /sys/devices/virtual/dmi file", err)
+		errorOut("Unable to read /sys/devices/virtual/dmi file")
 		value = "UNKNOWN"
 	} else {
 		fileData := string(fileBytes)

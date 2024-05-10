@@ -28,7 +28,7 @@ func GetDiskInfo() map[string]string {
 		fmtBlockDiskSizeBlocks := strings.Replace(string(blockDiskSizeBlocks), "\n", "", -1)
 		blockDiskSize, err3 := strconv.ParseFloat(fmtBlockDiskSizeBlocks, 64)
 		if err2 != nil || err3 != nil {
-			fmt.Errorf("Unable to read and parse block size")
+			errorOut("Unable to read and parse block size")
 		} else {
 			diskSize := fmt.Sprintf("%.0f GiB", math.Round(blockDiskSize/(2000000)))
 			diskSizes[blockDiskName] = diskSize

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"slices"
@@ -12,7 +11,7 @@ func GetIPInfo() []string {
 	var ipAddress []string
 	fibTrieFile, err1 := os.ReadFile("/proc/net/fib_trie")
 	if err1 != nil {
-		fmt.Errorf("Unable to read /proc/net/fib_trie")
+		errorOut("Unable to read /proc/net/fib_trie")
 		return ipAddress
 	}
 	fibTrieList := strings.Split(string(fibTrieFile), "/32 host LOCAL")
@@ -26,7 +25,7 @@ func GetIPInfo() []string {
 	}
 	ifconfigV6File, err2 := os.ReadFile("/proc/net/if_inet6")
 	if err2 != nil {
-		fmt.Errorf("Unable to read /proc/net/if_inet")
+		errorOut("Unable to read /proc/net/if_inet")
 		return ipAddress
 	}
 	ifconfigV6List := strings.Split(string(ifconfigV6File), "\n")

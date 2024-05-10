@@ -3,7 +3,6 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -11,11 +10,10 @@ import (
 )
 
 type PCIID struct {
-	VendorID   string `json:"vendorId"`
-	VendorName string `json:"vendorName"`
-	DeviceID   string `json:"deviceId"`
-	DeviceName string `json:"deviceName"`
-
+	VendorID      string `json:"vendorId"`
+	VendorName    string `json:"vendorName"`
+	DeviceID      string `json:"deviceId"`
+	DeviceName    string `json:"deviceName"`
 	SubVendorID   string `json:"subvendorId,omitempty"`
 	SubVendorName string `json:"subvendorName,omitempty"`
 	SubDeviceID   string `json:"subdeviceId,omitempty"`
@@ -32,7 +30,7 @@ func queryPCIInfo(pciIdWithVendorId string) string {
 	json.Unmarshal(pciDevicesData, &pciInfos)
 	pciInfo, err := pciInfos[pciIdWithVendorId]
 	if !err {
-		fmt.Errorf("PCI data doesn't exist")
+		errorOut("PCI data doesn't exist")
 	}
 	return pciInfo
 }
@@ -52,19 +50,18 @@ func GetAllPCIDevices() (map[string]string, []string) {
 	for _, pciModaliasFile := range pciModaliasFiles {
 		pciModaliasData, err2 := os.ReadFile(pciModaliasFile)
 		if err2 != nil {
-			fmt.Errorf("Unable to read PCI modalias file")
+			errorOut("Unable to read PCI modalias file")
 			continue
 		}
 		pciModaliasMatched := pciModaliasRegEx.FindStringSubmatch(string(pciModaliasData))
 		pciId := strings.Join(pciModaliasMatched[1:3], ":")
 		pciDeviceInfo, err3 := pciDevicesInfo[pciId]
-		if !err3 {
-			fmt.Errorf("PCI device data doesn't exist")
-		} else {
+		if err3 {
 			if strings.Contains(pciModaliasMatched[5], "03") {
 				gpuInfo = append(gpuInfo, pciDeviceInfo)
 			}
-			pciInfos[pciId] = pciDeviceInfo
+			pciCustomId := pciModaliasMatched[5] + ":" + pciId
+			pciInfos[pciCustomId] = pciDeviceInfo
 		}
 	}
 	return pciInfos, gpuInfo

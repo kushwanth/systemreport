@@ -19,7 +19,7 @@ func getDistroReleaseData() (map[string]string, error) {
 	var distroReleases map[string]string
 	err := json.Unmarshal(distroReleasesData, &distroReleases)
 	if err != nil {
-		fmt.Errorf("Unable to read Distro release file")
+		errorOut("Unable to read Distro release file")
 		return nil, err
 	}
 	return distroReleases, nil
@@ -50,7 +50,7 @@ func GetLinuxDistro() string {
 		distroReleaseFiles, err1 := filepath.Glob("/etc/*release")
 		distroVersionFiles, err2 := filepath.Glob("/etc/*version")
 		if err1 != nil || err2 != nil {
-			fmt.Errorf("No release Files found")
+			errorOut("No release Files found")
 			distroName = "Linux(Unknown)"
 		} else {
 			var possibleDistroNames = []string{}
@@ -84,7 +84,7 @@ func GetUptime() string {
 	uptimeData := strings.Split(string(uptimeFile), " ")
 	uptimeStr, err2 := strconv.ParseFloat(uptimeData[0], 64)
 	if err2 != nil {
-		fmt.Errorf("Unable to parse uptime")
+		errorOut("Unable to parse uptime")
 		return "UNKNOWN"
 	}
 	var uptime time.Time

@@ -45,7 +45,7 @@ func GetBatteryInfo() map[string]map[string]string {
 	var powerSupplyInfo = map[string]map[string]string{}
 	batteryUeventFiles, err1 := filepath.Glob("/sys/class/power_supply/[A-Z]*/uevent")
 	if err1 != nil {
-		fmt.Errorf("Unable to fetch battery state from /sys/class/power_supply")
+		errorOut("Unable to fetch battery state from /sys/class/power_supply")
 		return powerSupplyInfo
 	}
 	for _, batteryUeventFile := range batteryUeventFiles {

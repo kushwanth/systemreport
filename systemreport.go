@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
 )
 
 type SystemReport struct {
@@ -14,7 +16,7 @@ type SystemReport struct {
 	Hostname      string                       `json:"Hostname"`
 	CPU           string                       `json:"CPU"`
 	GPU           []string                     `json:"GPU"`
-	Threads       int                          `json:"Threads"`
+	Threads       string                       `json:"Threads"`
 	Memory        string                       `json:"Memory"`
 	Swap          string                       `json:"Swap"`
 	Uptime        string                       `json:"Uptime"`
@@ -26,7 +28,7 @@ type SystemReport struct {
 	PCIDevices    map[string]string            `json:"PCI:Devices"`
 }
 
-func main() {
+func getSystemReport() SystemReport {
 	var systemReport SystemReport
 	gccVersion := GetKernelGCCVersion()
 	distroName := GetLinuxDistro()
@@ -40,7 +42,7 @@ func main() {
 	systemReport.Arch = kernelInfo[0]
 	systemReport.GCCVersion = gccVersion
 	systemReport.Hostname = kernelInfo[1]
-	systemReport.Threads = CPUCount
+	systemReport.Threads = strconv.Itoa(CPUCount)
 	systemReport.CPU = CPUModel
 	systemReport.Memory = fmt.Sprintf("%d MB / %d MB", memFree, memTotal)
 	systemReport.Swap = fmt.Sprintf("%d MB / %d MB", swapFree, swapTotal)
@@ -62,10 +64,34 @@ func main() {
 		systemReport.GPU = gpuInfo
 	}
 	systemReport.PCIDevices = pciDevices
-	jsonSystemReport, err := json.MarshalIndent(systemReport, "", "    ")
-	if err != nil {
-		fmt.Errorf("Unable to generate System Report")
-	}
-	fmt.Println(string(jsonSystemReport))
+	return systemReport
+}
 
+func main() {
+	systemReport := getSystemReport()
+	stringOut("OS", systemReport.OS)
+	stringOut("Kernel:Release", systemReport.KernelRelease)
+	stringOut("Architecture", systemReport.Arch)
+	stringOut("GCC:Version", systemReport.GCCVersion)
+	stringOut("CPU", systemReport.CPU)
+	arrayOut("GPU", systemReport.GPU)
+	stringOut("Threads", systemReport.Threads)
+	stringOut("Memory", systemReport.Memory)
+	arrayOut("Network", systemReport.Network)
+	stringOut("Uptime", systemReport.Uptime)
+	mapOut("LANG", systemReport.Env)
+	mapOut("SHELL", systemReport.Env)
+	mapOut("USER", systemReport.Env)
+	mapOut("System:Vendor", systemReport.System)
+	mapOut("Product:Family", systemReport.System)
+	mapOut("BIOS:Version", systemReport.System)
+	mapOut("XDG_BACKEND", systemReport.Env)
+	stringOut("PCI:Devices", strconv.Itoa(len(systemReport.PCIDevices)))
+	jsonSystemReportBytes, err := json.MarshalIndent(systemReport, "", " ")
+	if err != nil {
+		errorOut("Unable to generate System Report")
+	} else {
+		os.WriteFile("/tmp/systemreport.json", jsonSystemReportBytes, 0644)
+		warningOut("Full System Report stored at /tmp/systemreport.json")
+	}
 }
